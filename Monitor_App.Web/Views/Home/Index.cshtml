@@ -1,8 +1,84 @@
-﻿@{
+﻿@model IEnumerable<LocationData>
+
+@{
     ViewData["Title"] = "Home Page";
+    ViewData["Title"] = $"Mapa de Dispositivo {ViewBag.DeviceId}";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h2>@ViewData["Title"]</h2>
+
+<div id="map" style="height: 600px; width: 100%;"></div>
+
+@section Scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY_DE_GOOGLE_MAPS"></script>
+    <script>
+        function initMap() {
+            var locations = @Html.Raw(Json.Serialize(Model));
+
+            if (locations.length === 0) {
+                // Ubicación por defecto si no hay datos
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 10,
+                    center: { lat: 19.4326, lng: -99.1332 } // Ciudad de México
+                });
+                return;
+            }
+
+            // Ordenar por timestamp (más reciente primero)
+            locations.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Crear mapa centrado en la última ubicación
+            var lastLocation = locations[0];
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: { lat: lastLocation.latitude, lng: lastLocation.longitude }
+            });
+
+            // Crear marcadores y ruta
+            var path = [];
+            var bounds = new google.maps.LatLngBounds();
+
+            for (var i = 0; i < locations.length; i++) {
+                var position = { lat: locations[i].latitude, lng: locations[i].longitude };
+                path.push(position);
+                bounds.extend(position);
+
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: new Date(locations[i].timestamp).toLocaleString()
+                });
+
+                // InfoWindow para mostrar detalles
+                var infoWindow = new google.maps.InfoWindow({
+                    content: `<div>
+                                <h3>Ubicación ${i+1}</h3>
+                                <p>Fecha: ${new Date(locations[i].timestamp).toLocaleString()}</p>
+                                <p>Precisión: ${locations[i].accuracy || 'N/A'} metros</p>
+                                <p>Velocidad: ${locations[i].speed || 'N/A'} m/s</p>
+                              </div>`
+                });
+
+                marker.addListener('click', function() {
+                    infoWindow.open(map, marker);
+                });
+            }
+
+            // Ajustar vista para mostrar todos los puntos
+            map.fitBounds(bounds);
+
+            // Dibujar ruta
+            var route = new google.maps.Polyline({
+                path: path,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+
+            route.setMap(map);
+        }
+
+        window.onload = initMap;
+    </script>
+}
