@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Monitor_App.Web.Data;
 using Monitor_App.Web.Models;
 using System.Diagnostics;
 

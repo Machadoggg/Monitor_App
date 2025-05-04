@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Monitor_App.Web.Data;
 using Monitor_App.Web.Models;
 
 namespace Monitor_App.Web.Controllers.Api
