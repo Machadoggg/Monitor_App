@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Monitor_App.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
