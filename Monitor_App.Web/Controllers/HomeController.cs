@@ -15,7 +15,7 @@ namespace Monitor_App.Web.Controllers
         {
             _context = context;
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("https://tumvcapi.com/api/"); // Cambiar por tu URL base
+            _httpClient.BaseAddress = new Uri("https://https://localhost:7054//api/"); // Cambiar por tu URL base
         }
 
         public async Task<IActionResult> Index()
