@@ -6,27 +6,48 @@ namespace Monitor_App.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
-            _logger = logger;
+            _context = context;
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.BaseAddress = new Uri("https://tumvcapi.com/api/"); // Cambiar por tu URL base
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var devices = await _context.Locations
+                .GroupBy(l => l.DeviceId)
+                .Select(g => g.Key)
+                .ToListAsync();
+
+            return View(devices);
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> DeviceLocations(string deviceId)
         {
-            return View();
+            var locations = await _context.Locations
+                .Where(l => l.DeviceId == deviceId)
+                .OrderByDescending(l => l.Timestamp)
+                .Take(50)
+                .ToListAsync();
+
+            ViewBag.DeviceId = deviceId;
+            return View(locations);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public async Task<IActionResult> MapView(string deviceId)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var locations = await _context.Locations
+                .Where(l => l.DeviceId == deviceId)
+                .OrderByDescending(l => l.Timestamp)
+                .Take(20)
+                .ToListAsync();
+
+            ViewBag.DeviceId = deviceId;
+            return View(locations);
         }
     }
 }
