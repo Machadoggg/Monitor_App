@@ -6,7 +6,7 @@ namespace Monitor_App.Movil
     {
         int count = 0;
         private readonly LocationService _locationService;
-        private const string ApiUrl = "https://tumvcapi.com/api/locations"; // Cambiar la URL
+        private const string ApiUrl = "https://localhost:7054//api/locations"; // Cambiar la URL
 
         public MainPage()
         {
